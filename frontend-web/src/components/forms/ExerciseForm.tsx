@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
+import { Navigate, useNavigate } from 'react-router-dom';
+import Button from '../common/Button';
 
 interface ExerciseFormProps {
   isOpen: boolean;
@@ -8,6 +10,7 @@ interface ExerciseFormProps {
   levelId: string;
   initialData?: any;
 }
+
 
 const ExerciseForm: React.FC<ExerciseFormProps> = ({ isOpen, onClose, onSubmit, levelId, initialData }) => {
   const [formData, setFormData] = useState({
@@ -19,7 +22,7 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ isOpen, onClose, onSubmit, 
     isActive: initialData?.isActive ?? true,
     content: initialData?.content || {}
   });
-
+  const  navigate = useNavigate();
   const exerciseTypes = [
     { value: 'multiple-choice', label: 'Trắc nghiệm' },
     { value: 'matching', label: 'Nối từ' },
@@ -35,20 +38,6 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ isOpen, onClose, onSubmit, 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={initialData ? "Chỉnh sửa Bài tập" : "Thêm Bài tập mới"}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tiêu đề *
-          </label>
-          <input
-            type="text"
-            required
-            value={formData.title}
-            onChange={(e) => setFormData({...formData, title: e.target.value})}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="VD: Bài tập trắc nghiệm cơ bản"
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Mô tả *
@@ -145,6 +134,17 @@ const ExerciseForm: React.FC<ExerciseFormProps> = ({ isOpen, onClose, onSubmit, 
             {initialData ? 'Cập nhật' : 'Thêm mới'}
           </button>
         </div>
+        {initialData && (
+  <div className="border-t pt-4 mt-4">
+    <Button
+      variant="secondary"
+      fullWidth
+      onClick={() => navigate(`/admin/exercises/${initialData.id}/content`)}
+    >
+      ⚙️ Cấu hình nội dung bài tập
+    </Button>
+  </div>
+)}
       </form>
     </Modal>
   );

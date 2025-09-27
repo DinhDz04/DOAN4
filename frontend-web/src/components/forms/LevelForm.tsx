@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
-import { X, Plus } from 'lucide-react';
+import { X } from 'lucide-react';
+
 interface LevelFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,7 +10,13 @@ interface LevelFormProps {
   initialData?: any;
 }
 
-const LevelForm: React.FC<LevelFormProps> = ({ isOpen, onClose, onSubmit, tierCode, initialData }) => {
+const LevelForm: React.FC<LevelFormProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  tierCode, 
+  initialData 
+}) => {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -18,7 +25,36 @@ const LevelForm: React.FC<LevelFormProps> = ({ isOpen, onClose, onSubmit, tierCo
     unlockConditions: initialData?.unlockConditions || []
   });
 
-  const [newCondition, setNewCondition] = useState('');
+  // Mock data - bạn sẽ thay thế bằng API call thực tế
+  const [availableLevels, setAvailableLevels] = useState([
+    { id: '1', name: 'Level 1 - Nhập môn', order: 1 },
+    { id: '2', name: 'Level 2 - Cơ bản', order: 2 },
+    { id: '3', name: 'Level 3 - Trung cấp', order: 3 },
+    { id: '4', name: 'Level 4 - Nâng cao', order: 4 },
+  ]);
+
+  const [selectedLevelId, setSelectedLevelId] = useState('');
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || '',
+        description: initialData.description || '',
+        order: initialData.order || 1,
+        isLocked: initialData.isLocked ?? false,
+        unlockConditions: initialData.unlockConditions || []
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        order: 1,
+        isLocked: false,
+        unlockConditions: []
+      });
+    }
+    setSelectedLevelId('');
+  }, [initialData, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,24 +62,44 @@ const LevelForm: React.FC<LevelFormProps> = ({ isOpen, onClose, onSubmit, tierCo
   };
 
   const addCondition = () => {
-    if (newCondition.trim()) {
-      setFormData({
-        ...formData,
-        unlockConditions: [...formData.unlockConditions, newCondition.trim()]
-      });
-      setNewCondition('');
+    if (selectedLevelId) {
+      const selectedLevel = availableLevels.find(level => level.id === selectedLevelId);
+      if (selectedLevel && !formData.unlockConditions.includes(selectedLevel.id)) {
+        setFormData({
+          ...formData,
+          unlockConditions: [...formData.unlockConditions, selectedLevel.id]
+        });
+        setSelectedLevelId('');
+      }
     }
   };
 
-  const removeCondition = (index: number) => {
+  const removeCondition = (levelId: string) => {
     setFormData({
       ...formData,
-      unlockConditions: formData.unlockConditions.filter((_ : string, i: number) => i !== index)
+      unlockConditions: formData.unlockConditions.filter((id: string) => id !== levelId)
     });
   };
 
+  // Lọc ra các level có thể chọn làm điều kiện (các level có order nhỏ hơn)
+  const getAvailableLevelsForCondition = () => {
+    return availableLevels.filter(level => 
+      level.order < formData.order && 
+      !formData.unlockConditions.includes(level.id)
+    );
+  };
+
+  const getLevelName = (levelId: string) => {
+    const level = availableLevels.find(l => l.id === levelId);
+    return level ? level.name : `Level ${levelId}`;
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={initialData ? "Chỉnh sửa Level" : `Thêm Level mới - Bậc ${tierCode}`}>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={initialData ? "Chỉnh sửa Level" : `Thêm Level mới - Bậc ${tierCode}`}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -103,37 +159,51 @@ const LevelForm: React.FC<LevelFormProps> = ({ isOpen, onClose, onSubmit, tierCo
         {formData.isLocked && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Điều kiện mở khóa
+              Điều kiện mở khóa (Chọn level cần hoàn thành)
             </label>
             <div className="space-y-2">
               <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newCondition}
-                  onChange={(e) => setNewCondition(e.target.value)}
+                <select
+                  value={selectedLevelId}
+                  onChange={(e) => setSelectedLevelId(e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="VD: Hoàn thành Level 1"
-                />
+                >
+                  <option value="">-- Chọn level --</option>
+                  {getAvailableLevelsForCondition().map(level => (
+                    <option key={level.id} value={level.id}>
+                      {level.name} (Thứ tự: {level.order})
+                    </option>
+                  ))}
+                </select>
                 <button
                   type="button"
                   onClick={addCondition}
-                  className="px-3 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
+                  disabled={!selectedLevelId}
+                  className="px-3 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Plus className="h-4 w-4" />
+                  Thêm
                 </button>
               </div>
-              {formData.unlockConditions.map((condition : string, index : number) => (
-                <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                  <span className="text-sm">{condition}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeCondition(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+              
+              {formData.unlockConditions.length > 0 && (
+                <div className="border rounded-lg p-2">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Level cần hoàn thành:</p>
+                  <div className="space-y-2">
+                    {formData.unlockConditions.map((levelId: string) => (
+                      <div key={levelId} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <span className="text-sm">{getLevelName(levelId)}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeCondition(levelId)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
@@ -157,4 +227,5 @@ const LevelForm: React.FC<LevelFormProps> = ({ isOpen, onClose, onSubmit, tierCo
     </Modal>
   );
 };
+
 export default LevelForm;

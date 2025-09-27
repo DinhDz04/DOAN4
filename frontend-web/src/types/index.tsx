@@ -6,6 +6,22 @@ export interface AlertProps {
   onClose?: () => void;
   className?: string;
 }
+export interface Blank {
+  id: string;
+  position: number;
+  correctAnswer: string;
+}
+export interface MultipleChoiceOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface MatchingPair {
+  id: string;
+  left: string;
+  right: string;
+}
 
 export interface BadgeProps {
   children: React.ReactNode;

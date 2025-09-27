@@ -8,6 +8,9 @@ import LevelDetailManagement from './components/admin/LevelDetailManagement';
 import LevelDetail from './components/admin/LevelDetail';
 import UserManagement from './components/admin/UserManagement';
 import GamificationManagement from './components/admin/GamificationManagement';
+import ExerciseContentManager from './components/admin/ExerciseContentManager';
+import VocabularyPreviewPage from './components/admin/VocabularyPreviewPage';
+import ExercisePreviewPage from './components/admin/ExercisePreviewPage';
 // import SystemSettings from './components/admin/SystemSettings';
 
 // Auth Pages (placeholder - bạn sẽ tạo sau)
@@ -56,6 +59,15 @@ function App() {
           } />
           <Route path="/admin/learning-path/:tierCode/levels/:levelId" element={
             isAdminAuthenticated() ? <LevelDetail /> : <Navigate to="/admin/login" replace />
+          } />
+          <Route path="/admin/exercises/:exerciseId" element={
+            isAdminAuthenticated() ? <ExerciseContentManager /> : <Navigate to="/admin/login" replace />
+          } />
+          <Route path = '/admin/exercises/:exerciseId/preview' element={
+            isAdminAuthenticated() ? <ExercisePreviewPage /> : <Navigate to="/admin/login" replace />
+          } />
+          <Route path = '/admin/levels/:levelId/vocabulary-preview' element={
+            isAdminAuthenticated() ? <VocabularyPreviewPage /> : <Navigate to="/admin/login" replace />
           } />
 
           
