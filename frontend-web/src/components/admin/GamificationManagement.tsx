@@ -7,47 +7,144 @@ import Button from '../common/Button';
 import Badge from '../common/Badge';
 import { GameItem, DailyQuest, GiftBox } from '../../types';
 
+// Import các forms
+import { GameItemForm, DailyQuestForm, GiftBoxForm } from '../forms/GamificationForms';
+
 const GamificationManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'items' | 'quests' | 'giftboxes'>('items');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingItem, setEditingItem] = useState<GameItem | DailyQuest | GiftBox | null>(null);
+  const [currentFormType, setCurrentFormType] = useState<'item' | 'quest' | 'giftbox' | null>(null);
 
-  // Mock data - sẽ được thay thế bằng API calls
+  // Mock data
   const [gameItems, setGameItems] = useState<GameItem[]>([]);
   const [dailyQuests, setDailyQuests] = useState<DailyQuest[]>([]);
   const [giftBoxes, setGiftBoxes] = useState<GiftBox[]>([]);
 
-  const itemTypeIcons = {
+    const itemTypeIcons = {
     xp_boost: <Zap className="h-4 w-4" />,
     point_boost: <Star className="h-4 w-4" />,
     streak_freeze: <Clock className="h-4 w-4" />,
-    theme: <span>🎨</span>,
-    avatar: <span>👤</span>
+    theme: <span>ðŸŽ¨</span>,
+    avatar: <span>ðŸ‘¤</span>
   };
-
   const questTypeLabels = {
-    exercises_completed: 'Hoàn thành bài tập',
-    points_earned: 'Kiếm điểm',
-    streak_maintained: 'Duy trì streak',
-    vocabulary_learned: 'Học từ vựng'
+    exercises_completed: 'HoÃ n thÃ nh bÃ i táº­p',
+    points_earned: 'Kiáº¿m Ä‘iá»ƒm',
+    streak_maintained: 'Duy trÃ¬ streak',
+    vocabulary_learned: 'Há»c tá»« vá»±ng'
   };
 
   const handleCreateNew = () => {
     setEditingItem(null);
+    setCurrentFormType(activeTab === 'items' ? 'item' : activeTab === 'quests' ? 'quest' : 'giftbox');
     setShowCreateModal(true);
   };
 
   const handleEdit = (item: GameItem | DailyQuest | GiftBox) => {
     setEditingItem(item);
+    // Xác định loại form dựa vào tab hiện tại
+    setCurrentFormType(activeTab === 'items' ? 'item' : activeTab === 'quests' ? 'quest' : 'giftbox');
     setShowCreateModal(true);
   };
 
+  const handleFormSubmit = (data: any) => {
+    if (currentFormType === 'item') {
+      if (editingItem) {
+        // Cập nhật item
+        setGameItems(items => 
+          items.map(item => item.id === editingItem.id ? { ...data, id: editingItem.id } : item)
+        );
+        console.log('Updated item:', data);
+      } else {
+        // Thêm item mới
+        const newItem = {
+          ...data,
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString()
+        };
+        setGameItems(items => [...items, newItem]);
+        console.log('Created new item:', newItem);
+      }
+    } else if (currentFormType === 'quest') {
+      if (editingItem) {
+        // Cập nhật quest
+        setDailyQuests(quests => 
+          quests.map(quest => quest.id === editingItem.id ? { ...data, id: editingItem.id } : quest)
+        );
+        console.log('Updated quest:', data);
+      } else {
+        // Thêm quest mới
+        const newQuest = {
+          ...data,
+          id: Date.now().toString()
+        };
+        setDailyQuests(quests => [...quests, newQuest]);
+        console.log('Created new quest:', newQuest);
+      }
+    } else if (currentFormType === 'giftbox') {
+      if (editingItem) {
+        // Cập nhật gift box
+        setGiftBoxes(boxes => 
+          boxes.map(box => box.id === editingItem.id ? { ...data, id: editingItem.id } : box)
+        );
+        console.log('Updated gift box:', data);
+      } else {
+        // Thêm gift box mới
+        const newGiftBox = {
+          ...data,
+          id: Date.now().toString(),
+          createdAt: new Date().toISOString()
+        };
+        setGiftBoxes(boxes => [...boxes, newGiftBox]);
+        console.log('Created new gift box:', newGiftBox);
+      }
+    }
+
+    // Đóng modal và reset state
+    setShowCreateModal(false);
+    setEditingItem(null);
+    setCurrentFormType(null);
+  };
+
+  const handleFormClose = () => {
+    setShowCreateModal(false);
+    setEditingItem(null);
+    setCurrentFormType(null);
+  };
+
   const handleDelete = (id: string, type: 'item' | 'quest' | 'giftbox') => {
-    console.log(`Delete ${type}:`, id);
+    if (window.confirm('Bạn có chắc chắn muốn xóa?')) {
+      if (type === 'item') {
+        setGameItems(items => items.filter(item => item.id !== id));
+      } else if (type === 'quest') {
+        setDailyQuests(quests => quests.filter(quest => quest.id !== id));
+      } else if (type === 'giftbox') {
+        setGiftBoxes(boxes => boxes.filter(box => box.id !== id));
+      }
+    }
   };
 
   const handleToggleActive = (id: string, type: 'item' | 'quest' | 'giftbox') => {
-    console.log(`Toggle active ${type}:`, id);
+    if (type === 'item') {
+      setGameItems(items => 
+        items.map(item => 
+          item.id === id ? { ...item, isActive: !item.isActive } : item
+        )
+      );
+    } else if (type === 'quest') {
+      setDailyQuests(quests => 
+        quests.map(quest => 
+          quest.id === id ? { ...quest, isActive: !quest.isActive } : quest
+        )
+      );
+    } else if (type === 'giftbox') {
+      setGiftBoxes(boxes => 
+        boxes.map(box => 
+          box.id === id ? { ...box, isActive: !box.isActive } : box
+        )
+      );
+    }
   };
 
   const renderGameItems = () => (
@@ -263,13 +360,6 @@ const GamificationManagement: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">Quản lý Gamification</h1>
             <p className="text-gray-600 mt-2">Quản lý vật phẩm, nhiệm vụ và hộp quà</p>
           </div>
-          <Button
-            variant="primary"
-            onClick={handleCreateNew}
-            icon={<Plus className="h-4 w-4" />}
-          >
-            Tạo mới
-          </Button>
         </div>
 
         {/* Tab Navigation */}
@@ -367,6 +457,26 @@ const GamificationManagement: React.FC = () => {
           </div>
         </div>
       )}
+      <GameItemForm
+        isOpen={showCreateModal && currentFormType === 'item'}
+        onClose={handleFormClose}
+        onSubmit={handleFormSubmit}
+        initialData={currentFormType === 'item' ? editingItem : null}
+      />
+
+      <DailyQuestForm
+        isOpen={showCreateModal && currentFormType === 'quest'}
+        onClose={handleFormClose}
+        onSubmit={handleFormSubmit}
+        initialData={currentFormType === 'quest' ? editingItem : null}
+      />
+
+      <GiftBoxForm
+        isOpen={showCreateModal && currentFormType === 'giftbox'}
+        onClose={handleFormClose}
+        onSubmit={handleFormSubmit}
+        initialData={currentFormType === 'giftbox' ? editingItem : null}
+      />
     </AdminLayout>
   );
 };

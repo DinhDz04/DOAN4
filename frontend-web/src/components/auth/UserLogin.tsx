@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
-import Card from '../common/Card';
-import Button from '../common/Button';
-import Alert from '../common/Alert';
+import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const AdminLogin: React.FC = () => {
+const UserLogin: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -31,8 +29,8 @@ const AdminLogin: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Mock authentication - thay thế bằng API call thực tế
-      if (formData.email === 'admin@example.com' && formData.password === 'admin123') {
-        localStorage.setItem('adminToken', 'mock-admin-token');
+      if (formData.email === 'user@example.com' && formData.password === 'user123') {
+        localStorage.setItem('userToken', 'mock-user-token');
         window.location.href = '/user/home';
       } else {
         setError('Email hoặc mật khẩu không chính xác');
@@ -52,18 +50,15 @@ const AdminLogin: React.FC = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <LogIn className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Login</h1>
-          <p className="text-gray-600">Đăng nhập vào hệ thống quản lý</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Đăng nhập</h1>
+          <p className="text-gray-600">Đăng nhập để bắt đầu học tiếng Anh</p>
         </div>
 
-        <Card padding="lg">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           {error && (
-            <Alert
-              type="error"
-              message={error}
-              className="mb-6"
-              onClose={() => setError('')}
-            />
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+              {error}
+            </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -78,7 +73,7 @@ const AdminLogin: React.FC = () => {
                 name="email"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="admin@example.com"
+                placeholder="user@example.com"
                 value={formData.email}
                 onChange={handleInputChange}
               />
@@ -114,7 +109,7 @@ const AdminLogin: React.FC = () => {
               </div>
             </div>
 
-            {/* Remember Me */}
+            {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -133,35 +128,44 @@ const AdminLogin: React.FC = () => {
             </div>
 
             {/* Submit Button */}
-            <Button
+            <button
               type="submit"
-              variant="primary"
-              className="w-full"
               disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-            </Button>
+            </button>
           </form>
+
+          {/* Register Link */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Chưa có tài khoản?{' '}
+              <Link to="/register" className="text-blue-600 hover:text-blue-500 font-semibold">
+                Đăng ký ngay
+              </Link>
+            </p>
+          </div>
 
           {/* Demo Credentials */}
           <div className="mt-6 p-3 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-600 mb-2">
-              <strong>Demo credentials:</strong>
+              <strong>Tài khoản demo:</strong>
             </p>
             <p className="text-xs text-gray-600">
-              Email: admin@example.com<br />
-              Password: admin123
+              Email: user@example.com<br />
+              Password: user123
             </p>
           </div>
-        </Card>
+        </div>
 
         {/* Footer */}
         <div className="text-center mt-8 text-sm text-gray-600">
-          © 2024 EnglishApp Admin. All rights reserved.
+          © 2024 EnglishApp. All rights reserved.
         </div>
       </div>
     </div>
   );
 };
 
-export default AdminLogin;
+export default UserLogin;
