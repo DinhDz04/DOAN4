@@ -6,7 +6,8 @@ const Card: React.FC<CardProps> = ({
   className = '', 
   padding = 'md', 
   shadow = 'md',
-  hover = false 
+  hover = false ,
+  onClick
 }) => {
   const paddings = {
     sm: 'p-3',

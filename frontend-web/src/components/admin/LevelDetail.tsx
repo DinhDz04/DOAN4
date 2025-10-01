@@ -11,6 +11,8 @@ import {
   Volume2,
   Bookmark,
   Settings,
+  Menu,
+  X,
 } from "lucide-react";
 import AdminLayout from "./AdminLayout";
 import Card from "../common/Card";
@@ -33,6 +35,7 @@ const LevelDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState<
     "overview" | "vocabulary" | "exercises" | "comprehensive"
   >("overview");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   // Mock data - bạn có thể thay thế bằng API call
 
@@ -198,48 +201,81 @@ const LevelDetail: React.FC = () => {
 
   return (
     <AdminLayout currentPage="learning-path">
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6 p-4 md:p-0">
         {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-sm text-gray-500">
+        <div className="flex items-center flex-wrap space-x-2 text-sm text-gray-500 gap-1">
           <button
             onClick={() => navigate("/admin/learning-path")}
-            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
+            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Lộ trình học</span>
+            <span className="hidden xs:inline">Lộ trình học</span>
+            <span className="xs:hidden">Lộ trình</span>
           </button>
           <span>/</span>
           <button
             onClick={handleBack}
-            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
+            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
           >
             <span>Bậc {tierCode}</span>
           </button>
           <span>/</span>
-          <span className="text-gray-900 font-medium">{level.name}</span>
+          <span className="text-gray-900 font-medium truncate max-w-[150px] xs:max-w-none">
+            {level.name}
+          </span>
         </div>
 
         {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{level.name}</h1>
-            <p className="text-gray-600 mt-2">{level.description}</p>
-            <div className="flex space-x-4 mt-3 text-sm text-gray-500">
-              <span>📚 {level.vocabularyCount} từ vựng</span>
-              <span>🎯 {level.exerciseCount} bài tập</span>
-              <span>🔢 Thứ tự: {level.order}</span>
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 break-words">
+              {level.name}
+            </h1>
+            <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base break-words">
+              {level.description}
+            </p>
+            <div className="flex flex-wrap gap-2 md:gap-4 mt-2 md:mt-3 text-xs md:text-sm text-gray-500">
+              <span className="flex items-center gap-1">
+                <BookOpen className="h-3 w-3 md:h-4 md:w-4" />
+                {level.vocabularyCount} từ vựng
+              </span>
+              <span className="flex items-center gap-1">
+                <FileText className="h-3 w-3 md:h-4 md:w-4" />
+                {level.exerciseCount} bài tập
+              </span>
+              <span className="flex items-center gap-1">
+                <span>🔢</span>
+                Thứ tự: {level.order}
+              </span>
             </div>
           </div>
-          <div className="flex space-x-2">
-            <Button variant="secondary" icon={<Edit className="h-4 w-4" />}>
-              Chỉnh sửa Level
+          <div className="flex flex-wrap gap-2 self-start">
+            <Button 
+              variant="secondary" 
+              icon={<Edit className="h-4 w-4" />}
+              className="w-full sm:w-auto justify-center"
+            >
+              <span className="hidden sm:inline">Chỉnh sửa Level</span>
+              <span className="sm:hidden">Sửa Level</span>
             </Button>
           </div>
         </div>
 
+        {/* Mobile Menu Button */}
+        <div className="block lg:hidden">
+          <Button
+            variant="secondary"
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            icon={showMobileMenu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            fullWidth
+          >
+            {showMobileMenu ? "Đóng menu" : "Mở menu tab"}
+          </Button>
+        </div>
+
         {/* Tab Navigation */}
-        <Card padding="sm">
-          <div className="flex space-x-1">
+        <Card padding="sm" className={`${showMobileMenu ? 'block' : 'hidden'} lg:block`}>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-1">
             {[
               { id: "overview", label: "Tổng quan", icon: "📊" },
               { id: "vocabulary", label: "Sổ tay từ vựng", icon: "📖" },
@@ -247,14 +283,17 @@ const LevelDetail: React.FC = () => {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                onClick={() => {
+                  setActiveTab(tab.id as any);
+                  setShowMobileMenu(false);
+                }}
+                className={`flex items-center justify-center sm:justify-start space-x-2 px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${
                   activeTab === tab.id
                     ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:text-gray-900"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
-                <span>{tab.icon}</span>
+                <span className="text-base">{tab.icon}</span>
                 <span>{tab.label}</span>
               </button>
             ))}
@@ -263,7 +302,7 @@ const LevelDetail: React.FC = () => {
 
         {/* Content */}
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
             {/* Vocabulary Summary */}
             <Card>
               <div className="flex items-center justify-between mb-4">
@@ -279,15 +318,17 @@ const LevelDetail: React.FC = () => {
                     key={vocab.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
-                    <div>
-                      <div className="font-medium">{vocab.word}</div>
-                      <div className="text-sm text-gray-600">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-gray-900 truncate">
+                        {vocab.word}
+                      </div>
+                      <div className="text-sm text-gray-600 truncate">
                         {vocab.definition}
                       </div>
                     </div>
                     <button
                       onClick={() => handlePlayAudio(vocab.audioUrl!)}
-                      className="text-gray-400 hover:text-blue-600"
+                      className="text-gray-400 hover:text-blue-600 ml-2 flex-shrink-0"
                     >
                       <Volume2 className="h-4 w-4" />
                     </button>
@@ -309,7 +350,7 @@ const LevelDetail: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold flex items-center space-x-2">
                   <FileText className="h-5 w-5 text-blue-600" />
-                  <span>Bài tập </span>
+                  <span>Bài tập</span>
                 </h3>
                 <Badge variant="info">{exercises.length} bài</Badge>
               </div>
@@ -319,13 +360,15 @@ const LevelDetail: React.FC = () => {
                     key={exercise.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-lg">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                      <span className="text-lg flex-shrink-0">
                         {getExerciseIcon(exercise.type)}
                       </span>
-                      <div>
-                        <div className="font-medium">{exercise.title}</div>
-                        <div className="text-sm text-gray-600">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-gray-900 truncate">
+                          {exercise.title}
+                        </div>
+                        <div className="text-sm text-gray-600 truncate">
                           {exercise.points} điểm
                         </div>
                       </div>
@@ -347,50 +390,51 @@ const LevelDetail: React.FC = () => {
 
         {activeTab === "vocabulary" && (
           <Card>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
               <h2 className="text-xl font-semibold flex items-center space-x-2">
                 <BookOpen className="h-5 w-5" />
                 <span>Sổ tay từ vựng</span>
               </h2>
-              <Button
-                variant="primary"
-                icon={<Plus className="h-4 w-4" />}
-                onClick={handleAddVocabulary}
-              >
-                Thêm từ vựng
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate(`/admin/levels/${levelId}/vocabulary-preview`)}
+                  className="justify-center"
+                >
+                  <span className="hidden sm:inline">👁️ Xem trước tất cả từ vựng</span>
+                  <span className="sm:hidden">👁️ Xem trước</span>
+                </Button>
+                <Button
+                  variant="primary"
+                  icon={<Plus className="h-4 w-4" />}
+                  onClick={handleAddVocabulary}
+                  className="justify-center"
+                >
+                  <span className="hidden sm:inline">Thêm từ vựng</span>
+                  <span className="sm:hidden">Thêm từ</span>
+                </Button>
+              </div>
             </div>
-            <Button
-              variant="secondary"
-              fullWidth
-              className="mt-4"
-              onClick={() =>
-                window.open(
-                  `/admin/levels/${levelId}/vocabulary-preview`,
-                  "_blank"
-                )
-              }
-            >
-              👁️ Xem trước tất cả từ vựng
-            </Button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
               {vocabulary.map((vocab) => (
                 <div
                   key={vocab.id}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="border rounded-lg p-3 md:p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-lg">{vocab.word}</h3>
+                    <div className="flex items-center space-x-2 min-w-0 flex-1">
+                      <h3 className="font-semibold text-base md:text-lg truncate">
+                        {vocab.word}
+                      </h3>
                       <button
                         onClick={() => handlePlayAudio(vocab.audioUrl!)}
-                        className="text-gray-400 hover:text-blue-600"
+                        className="text-gray-400 hover:text-blue-600 flex-shrink-0"
                       >
                         <Volume2 className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="flex space-x-1">
+                    <div className="flex space-x-1 ml-2 flex-shrink-0">
                       <button
                         onClick={() => handleEditVocabulary(vocab)}
                         className="text-gray-400 hover:text-blue-600 p-1"
@@ -403,18 +447,18 @@ const LevelDetail: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-sm">
                     <div>
-                      <span className="text-sm text-gray-500">Phát âm:</span>
-                      <p className="text-gray-700">{vocab.pronunciation}</p>
+                      <span className="text-xs text-gray-500">Phát âm:</span>
+                      <p className="text-gray-700 text-sm truncate">{vocab.pronunciation}</p>
                     </div>
                     <div>
-                      <span className="text-sm text-gray-500">Nghĩa:</span>
-                      <p className="text-gray-700">{vocab.definition}</p>
+                      <span className="text-xs text-gray-500">Nghĩa:</span>
+                      <p className="text-gray-700 text-sm line-clamp-2">{vocab.definition}</p>
                     </div>
                     <div>
-                      <span className="text-sm text-gray-500">Ví dụ:</span>
-                      <p className="text-gray-700 italic">"{vocab.example}"</p>
+                      <span className="text-xs text-gray-500">Ví dụ:</span>
+                      <p className="text-gray-700 text-sm italic line-clamp-2">"{vocab.example}"</p>
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <Badge variant="info" size="sm">
@@ -430,7 +474,7 @@ const LevelDetail: React.FC = () => {
 
         {activeTab === "exercises" && (
           <Card>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
               <h2 className="text-xl font-semibold flex items-center space-x-2">
                 <FileText className="h-5 w-5" />
                 <span>Bài tập</span>
@@ -439,8 +483,10 @@ const LevelDetail: React.FC = () => {
                 variant="primary"
                 icon={<Plus className="h-4 w-4" />}
                 onClick={handleAddExercise}
+                className="w-full sm:w-auto justify-center"
               >
-                Thêm bài tập
+                <span className="hidden sm:inline">Thêm bài tập</span>
+                <span className="sm:hidden">Thêm bài tập</span>
               </Button>
             </div>
 
@@ -450,59 +496,60 @@ const LevelDetail: React.FC = () => {
                   key={exercise.id}
                   className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-2xl">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex items-start space-x-4 flex-1 min-w-0">
+                      <div className="text-2xl flex-shrink-0">
                         {getExerciseIcon(exercise.type)}
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 text-lg md:text-base break-words">
                           {exercise.title}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 mt-1 break-words">
                           {exercise.description}
                         </p>
-                        <div className="flex space-x-4 mt-1 text-xs text-gray-500">
-                          <span>🎯 {exercise.points} điểm</span>
+                        <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            🎯 {exercise.points} điểm
+                          </span>
                           {exercise.timeLimit && (
-                            <span>⏱️ {exercise.timeLimit}s</span>
+                            <span className="flex items-center gap-1">
+                              ⏱️ {exercise.timeLimit}s
+                            </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex space-x-1">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<Play className="h-4 w-4" />}
-                          onClick={() =>
-                            window.open(
-                              `/admin/exercises/${exercise.id}/preview`,
-                              "_blank"
-                            )
-                          }
-                        >
-                          Xem trước
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<Settings className="h-4 w-4" />}
-                          onClick={() =>
-                            navigate(`/admin/exercises/${exercise.id}`)
-                          }
-                        >
-                          Cấu hình
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          icon={<Trash2 className="h-4 w-4" />}
-                        >
-                          Xóa
-                        </Button>
-                      </div>
+                    <div className="flex flex-col sm:flex-row gap-2 lg:justify-end">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Play className="h-4 w-4" />}
+                        onClick={() => navigate(`/admin/exercises/${exercise.id}/preview`)}
+                        className="justify-center"
+                      >
+                        <span className="hidden sm:inline">Xem trước</span>
+                        <span className="sm:hidden">Xem</span>
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Settings className="h-4 w-4" />}
+                        onClick={() => navigate(`/admin/exercises/${exercise.id}`)}
+                        className="justify-center"
+                      >
+                        <span className="hidden sm:inline">Cấu hình</span>
+                        <span className="sm:hidden">Cài đặt</span>
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        icon={<Trash2 className="h-4 w-4" />}
+                        className="justify-center"
+                      >
+                        <span className="hidden sm:inline">Xóa</span>
+                        <span className="sm:hidden">Xóa</span>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -510,6 +557,7 @@ const LevelDetail: React.FC = () => {
             </div>
           </Card>
         )}
+        
         <VocabularyForm
           isOpen={showVocabForm}
           onClose={() => {

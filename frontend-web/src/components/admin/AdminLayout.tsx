@@ -12,6 +12,8 @@ import {
   LogOut,
   User
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -19,6 +21,8 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const menuItems = [
@@ -55,8 +59,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   ];
 
   const handleLogout = () => {
-    // Handle logout logic
-    console.log('Logout');
+    logout();
+    navigate('/admin/login');
   };
 
   return (
@@ -123,8 +127,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
                 </div>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700">Admin User</p>
-                <p className="text-xs text-gray-500">admin@example.com</p>
+                <p className="text-sm font-medium text-gray-700">{user?.name || 'Admin User'}</p>
+                <p className="text-xs text-gray-500">{user?.email || 'admin@example.com'}</p>
               </div>
             </div>
             <button
@@ -172,4 +176,4 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   );
 };
 
-export default AdminLayout;
+export default AdminLayout;

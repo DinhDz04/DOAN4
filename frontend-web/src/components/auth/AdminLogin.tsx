@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Card from '../common/Card';
 import Button from '../common/Button';
 import Alert from '../common/Alert';
 
 const AdminLogin: React.FC = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -27,18 +31,10 @@ const AdminLogin: React.FC = () => {
     setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock authentication - thay thế bằng API call thực tế
-      if (formData.email === 'admin@example.com' && formData.password === 'admin123') {
-        localStorage.setItem('adminToken', 'mock-admin-token');
-        window.location.href = '/user/home';
-      } else {
-        setError('Email hoặc mật khẩu không chính xác');
-      }
-    } catch (err) {
-      setError('Đã có lỗi xảy ra. Vui lòng thử lại.');
+      await login(formData.email, formData.password, true);
+      navigate('/admin');
+    } catch (err: any) {
+      setError(err.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -164,4 +160,4 @@ const AdminLogin: React.FC = () => {
   );
 };
 
-export default AdminLogin;
+export default AdminLogin;

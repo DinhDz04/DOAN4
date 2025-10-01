@@ -5,6 +5,9 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+// import ErrorBoundary from "./components/common/ErrorBoundary";
 
 // Admin Pages
 import Dashboard from "./components/admin/Dashboard";
@@ -18,6 +21,12 @@ import VocabularyPreviewPage from "./components/admin/VocabularyPreviewPage";
 import ExercisePreviewPage from "./components/admin/ExercisePreviewPage";
 import UserLayouts from "./components/user/UserLayout";
 import UserHomepage from "./components/user/UserHomepage";
+import LearningLevels from "./components/user/LearningLevels";
+import LevelDetails from "./components/user/LevelDetail";
+import ExercisePage from "./components/user/ExercisePage";
+import TierDetail from "./components/user/TierDetail";
+import ExerciseReview from "./components/user/ExerciseReview";
+
 // import SystemSettings from './components/admin/SystemSettings';
 
 // Auth Pages (placeholder - bạn sẽ tạo sau)
@@ -27,24 +36,11 @@ import UserLogin from "./components/auth/UserLogin";
 // User Pages (placeholder - bạn sẽ tạo sau)
 
 function App() {
-  // Placeholder cho authentication logic
-  const isAdminAuthenticated = () => {
-    // Logic kiểm tra authentication
-    const token = localStorage.getItem("adminToken");
-
-    return !!token; // Đơn giản hóa, thực tế cần validate token
-  };
-
-  const isUserAuthenticated = () => {
-    // Logic kiểm tra authentication cho user
-    const token = localStorage.getItem("userToken");
-    return !!token;
-  };
-
   return (
-    <Router>
-      <div className="App">
-        <Routes>
+    <AuthProvider>
+        <Router>
+          <div className="App">
+          <Routes>
           {/* User Auth Routes */}
           {/* <Route path="/login" element={<div>User Login Page - Chưa implement</div>} />
           <Route path="/register" element={<div>User Register Page - Chưa implement</div>} /> */}
@@ -57,107 +53,102 @@ function App() {
           <Route
             path="/admin"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <Dashboard />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
           <Route
             path="/user"
             element={
-              isUserAuthenticated() ? (
+              <ProtectedRoute requireUser>
                 <UserLayouts currentPage="home" />
-              ) : (
-                <Navigate to="/user/login" replace />
-              )
+              </ProtectedRoute>
             }
           >
             <Route path="home" element={<UserHomepage />} />
             {/* Thêm các route user khác sau này */}
           </Route>
+          <Route
+  path="/learning"
+  element={
+    <ProtectedRoute requireUser>
+      <UserLayouts currentPage="learning" />
+    </ProtectedRoute>
+  }
+>
+
+  <Route index element={<LearningLevels />} />
+  <Route path="tier/:tierCode" element={<TierDetail />} />
+  <Route path="level/:levelId" element={<LevelDetails />} />
+  <Route path="exercise/:exerciseId" element={<ExercisePage />} />
+  <Route path="exercise/:exerciseId/review" element={<ExerciseReview />} />
+</Route>
 
           <Route
             path="/admin/learning-path"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <LearningPathManagement />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/learning-path/:tierCode"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <LevelDetailManagement />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/learning-path/:tierCode/levels/:levelId"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <LevelDetail />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/exercises/:exerciseId"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <ExerciseContentManager />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/exercises/:exerciseId/preview"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <ExercisePreviewPage />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
           <Route
             path="/admin/levels/:levelId/vocabulary-preview"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <VocabularyPreviewPage />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/admin/users"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <UserManagement />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/admin/gamification"
             element={
-              isAdminAuthenticated() ? (
+              <ProtectedRoute requireAdmin>
                 <GamificationManagement />
-              ) : (
-                <Navigate to="/admin/login" replace />
-              )
+              </ProtectedRoute>
             }
           />
 
@@ -188,6 +179,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </AuthProvider>
   );
 }
 

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const UserLogin: React.FC = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -25,18 +28,10 @@ const UserLogin: React.FC = () => {
     setError('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock authentication - thay thế bằng API call thực tế
-      if (formData.email === 'user@example.com' && formData.password === 'user123') {
-        localStorage.setItem('userToken', 'mock-user-token');
-        window.location.href = '/user/home';
-      } else {
-        setError('Email hoặc mật khẩu không chính xác');
-      }
-    } catch (err) {
-      setError('Đã có lỗi xảy ra. Vui lòng thử lại.');
+      await login(formData.email, formData.password, false);
+      navigate('/user/home');
+    } catch (err: any) {
+      setError(err.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -168,4 +163,4 @@ const UserLogin: React.FC = () => {
   );
 };
 
-export default UserLogin;
+export default UserLogin;

@@ -1,44 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Plus,
   Edit,
   Trash2,
-  BookOpen,
-  Lock,
-  Unlock,
   Eye,
-  FileText,
-  Link2,
   CheckCircle,
+  Menu,
+  X,
 } from "lucide-react";
 import AdminLayout from "./AdminLayout";
 import Card from "../common/Card";
 import Button from "../common/Button";
 import Badge from "../common/Badge";
-import { Tier, Level, Vocabulary, Exercise } from "../../types";
+import { Tier, Level} from "../../types";
 import { LevelForm } from "../forms";
 
 const LevelDetailManagement: React.FC = () => {
   const { tierCode } = useParams<{ tierCode: string }>();
   const navigate = useNavigate();
-  const [selectedLevel, setSelectedLevel] = useState<string>("");
   const [showLevelForm, setShowLevelForm] = useState(false);
   const [editingLevel, setEditingLevel] = useState<Level | null>(null);
-
-  const [activeTab, setActiveTab] = useState<
-    "levels" | "vocabulary" | "exercises"
-  >("levels");
-
+  const [activeTab, setActiveTab] = useState<"levels" | "vocabulary" | "exercises">("levels");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleCreateLevel = () => {
     setEditingLevel(null);
-    setShowLevelForm(true);
-  };
-
-  const handleEditLevel = (level: Level) => {
-    setEditingLevel(level);
     setShowLevelForm(true);
   };
 
@@ -51,6 +39,7 @@ const LevelDetailManagement: React.FC = () => {
     setShowLevelForm(false);
     setEditingLevel(null);
   };
+
   // Mock data - bạn có thể thay thế bằng API call
   const tier: Tier = {
     id: "1",
@@ -92,34 +81,6 @@ const LevelDetailManagement: React.FC = () => {
     },
   ];
 
-  const vocabulary: Vocabulary[] = [
-    {
-      id: "1",
-      levelId: "1",
-      word: "hello",
-      pronunciation: "/həˈloʊ/",
-      definition: "Xin chào",
-      example: "Hello, how are you?",
-      partOfSpeech: "interjection",
-      createdAt: "2024-01-01",
-    },
-  ];
-
-  const exercises: Exercise[] = [
-    {
-      id: "1",
-      levelId: "1",
-      title: "Bài tập trắc nghiệm cơ bản",
-      description: "Chọn đáp án đúng",
-      type: "multiple-choice",
-      content: {},
-      points: 10,
-      isActive: true,
-      createdAt: "2024-01-01",
-      updatedAt: "2024-01-01",
-    },
-  ];
-
   function getTierName(code: string): string {
     const names = {
       A1: "Beginner",
@@ -148,10 +109,6 @@ const LevelDetailManagement: React.FC = () => {
     navigate("/admin/learning-path");
   };
 
-  const handleCreateNew = (type: "level" | "vocabulary" | "exercise") => {
-    console.log(`Create new ${type} for tier ${tierCode}`);
-  };
-
   const handleEditItem = (
     type: "level" | "vocabulary" | "exercise",
     id: string
@@ -168,54 +125,72 @@ const LevelDetailManagement: React.FC = () => {
 
   return (
     <AdminLayout currentPage="learning-path">
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6 p-4 md:p-0">
         {/* Header với breadcrumb */}
         <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
           <button
             onClick={handleBack}
-            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
+            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Quay lại quản lý lộ trình</span>
+            <span className="hidden sm:inline">Quay lại quản lý lộ trình</span>
+            <span className="sm:hidden">Quay lại</span>
           </button>
           <span>/</span>
           <span className="text-gray-900 font-medium">Bậc {tierCode}</span>
         </div>
 
         {/* Page Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
               Quản lý Bậc {tierCode}
             </h1>
-            <p className="text-gray-600 mt-2">{tier.description}</p>
+            <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">
+              {tier.description}
+            </p>
           </div>
-          <Badge variant="success" size="lg">
+          <Badge variant="success" size="lg" className="self-start sm:self-auto">
             {tier.levelCount} Levels
           </Badge>
         </div>
 
+        {/* Mobile Menu Button */}
+        <div className="block md:hidden">
+          <Button
+            variant="secondary"
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            icon={showMobileMenu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            fullWidth
+          >
+            {showMobileMenu ? "Đóng menu" : "Mở menu"}
+          </Button>
+        </div>
+
         {/* Tab Navigation */}
-        <Card padding="sm">
-          <div className="flex space-x-4">
+        <Card padding="sm" className={`${showMobileMenu ? 'block' : 'hidden'} md:block`}>
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
             <button
-              onClick={() => setActiveTab("levels")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              onClick={() => {
+                setActiveTab("levels");
+                setShowMobileMenu(false);
+              }}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors text-left ${
                 activeTab === "levels"
                   ? "bg-blue-100 text-blue-700"
-                  : "text-gray-600 hover:text-gray-900"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               }`}
             >
               Quản lý Levels
             </button>
-            
+            {/* Thêm các tab khác nếu cần */}
           </div>
         </Card>
 
         {/* Content based on active tab */}
         {activeTab === "levels" && (
           <Card>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
                 Danh sách Levels
               </h2>
@@ -223,8 +198,10 @@ const LevelDetailManagement: React.FC = () => {
                 variant="primary"
                 onClick={handleCreateLevel}
                 icon={<Plus className="h-4 w-4" />}
+                className="w-full sm:w-auto"
               >
-                Thêm Level
+                <span className="hidden sm:inline">Thêm Level</span>
+                <span className="sm:hidden">Thêm Level</span>
               </Button>
             </div>
 
@@ -234,19 +211,19 @@ const LevelDetailManagement: React.FC = () => {
                   key={level.id}
                   className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex items-start space-x-4 flex-1">
+                      <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                         <CheckCircle className="h-5 w-5" />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-lg md:text-base break-words">
                           {level.name}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 mt-1 break-words">
                           {level.description}
                         </p>
-                        <div className="flex space-x-4 mt-1 text-xs text-gray-500">
+                        <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
                           <span>{level.vocabularyCount} từ vựng</span>
                           <span>{level.exerciseCount} bài tập</span>
                           <span>Thứ tự: {level.order}</span>
@@ -255,37 +232,43 @@ const LevelDetailManagement: React.FC = () => {
                         {level.unlockConditions && (
                           <div className="mt-2">
                             <Badge variant="info" size="sm">
-                              Điều kiện user:{" "}
-                              {level.unlockConditions.join(", ")}
+                              Điều kiện user: {level.unlockConditions.join(", ")}
                             </Badge>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-<Button
-  variant="secondary"
-  size="sm"
-  icon={<Eye className="h-4 w-4" />}
-  onClick={() => navigate(`/admin/learning-path/${tierCode}/levels/${level.id}`)}
->
-  Xem chi tiết
-</Button>
+                    
+                    <div className="flex flex-col sm:flex-row gap-2 lg:justify-end">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={<Eye className="h-4 w-4" />}
+                        onClick={() => navigate(`/admin/learning-path/${tierCode}/levels/${level.id}`)}
+                        className="flex-1 sm:flex-none justify-center"
+                      >
+                        <span className="hidden sm:inline">Xem chi tiết</span>
+                        <span className="sm:hidden">Xem</span>
+                      </Button>
                       <Button
                         variant="secondary"
                         size="sm"
                         icon={<Edit className="h-4 w-4" />}
                         onClick={() => handleEditItem("level", level.id)}
+                        className="flex-1 sm:flex-none justify-center"
                       >
-                        Sửa
+                        <span className="hidden sm:inline">Sửa</span>
+                        <span className="sm:hidden">Sửa</span>
                       </Button>
                       <Button
                         variant="danger"
                         size="sm"
                         icon={<Trash2 className="h-4 w-4" />}
                         onClick={() => handleDeleteItem("level", level.id)}
+                        className="flex-1 sm:flex-none justify-center"
                       >
-                        Xóa
+                        <span className="hidden sm:inline">Xóa</span>
+                        <span className="sm:hidden">Xóa</span>
                       </Button>
                     </div>
                   </div>
@@ -294,6 +277,7 @@ const LevelDetailManagement: React.FC = () => {
             </div>
           </Card>
         )}
+        
         <LevelForm
           isOpen={showLevelForm}
           onClose={() => {
@@ -304,7 +288,6 @@ const LevelDetailManagement: React.FC = () => {
           tierCode={tierCode || ''}
           initialData={editingLevel}
         />
-
       </div>
     </AdminLayout>
   );

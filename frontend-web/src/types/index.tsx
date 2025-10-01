@@ -30,18 +30,16 @@ export interface BadgeProps {
   className?: string;
 }
 
-export interface ButtonProps {
-  children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning';
-  size?: 'sm' | 'md' | 'lg';
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children?: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'ghost' | 'outline';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   disabled?: boolean;
-  onClick?: () => void;
   className?: string;
   icon?: React.ReactNode;
   fullWidth?: boolean;
   as?: React.ElementType;
   to?: string;
-  type?: 'button' | 'submit' | 'reset';
 }
 
 export interface CardProps {
@@ -50,6 +48,7 @@ export interface CardProps {
   padding?: 'sm' | 'md' | 'lg';
   shadow?: 'sm' | 'md' | 'lg';
   hover?: boolean;
+  onClick?: () => void;
 }
 
 export interface ProgressBarProps {
