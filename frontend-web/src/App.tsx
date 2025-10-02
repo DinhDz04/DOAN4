@@ -26,6 +26,11 @@ import LevelDetails from "./components/user/LevelDetail";
 import ExercisePage from "./components/user/ExercisePage";
 import TierDetail from "./components/user/TierDetail";
 import ExerciseReview from "./components/user/ExerciseReview";
+import Shop from "./components/user/Shop";
+import Quests from "./components/user/Quests";
+import Leaderboard from "./components/user/Leaderboard";
+import Friends from "./components/user/Friends";
+// import Friends from "./components/user/Friends";
 
 // import SystemSettings from './components/admin/SystemSettings';
 
@@ -38,147 +43,193 @@ import UserLogin from "./components/auth/UserLogin";
 function App() {
   return (
     <AuthProvider>
-        <Router>
-          <div className="App">
+      <Router>
+        <div className="App">
           <Routes>
-          {/* User Auth Routes */}
-          {/* <Route path="/login" element={<div>User Login Page - Chưa implement</div>} />
+            {/* User Auth Routes */}
+            {/* <Route path="/login" element={<div>User Login Page - Chưa implement</div>} />
           <Route path="/register" element={<div>User Register Page - Chưa implement</div>} /> */}
 
-          {/* Admin Auth Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/user/login" element={<UserLogin />} />
+            {/* Admin Auth Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/user/login" element={<UserLogin />} />
 
-          {/* Protected Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute requireAdmin>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/user"
-            element={
-              <ProtectedRoute requireUser>
-                <UserLayouts currentPage="home" />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="home" element={<UserHomepage />} />
-            {/* Thêm các route user khác sau này */}
-          </Route>
-          <Route
-  path="/learning"
-  element={
-    <ProtectedRoute requireUser>
-      <UserLayouts currentPage="learning" />
-    </ProtectedRoute>
-  }
->
+            {/* Protected Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/user"
+              element={
+                <ProtectedRoute requireUser>
+                  <UserLayouts currentPage="home" />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="home" element={<UserHomepage />} />
+              {/* Thêm các route user khác sau này */}
+            </Route>
+            <Route
+              path="/learning"
+              element={
+                <ProtectedRoute requireUser>
+                  <UserLayouts currentPage="learning" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<LearningLevels />} />
+              <Route path="tier/:tierCode" element={<TierDetail />} />
+              <Route path="level/:levelId" element={<LevelDetails />} />
+              <Route path="exercise/:exerciseId" element={<ExercisePage />} />
+              <Route
+                path="exercise/:exerciseId/review"
+                element={<ExerciseReview />}
+              />
+            </Route>
+            <Route
+              path="/shop"
+              element={
+                <ProtectedRoute requireUser>
+                  <UserLayouts currentPage="shop" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Shop />} />
+            </Route>
 
-  <Route index element={<LearningLevels />} />
-  <Route path="tier/:tierCode" element={<TierDetail />} />
-  <Route path="level/:levelId" element={<LevelDetails />} />
-  <Route path="exercise/:exerciseId" element={<ExercisePage />} />
-  <Route path="exercise/:exerciseId/review" element={<ExerciseReview />} />
-</Route>
+            <Route
+              path="/quests"
+              element={
+                <ProtectedRoute requireUser>
+                  <UserLayouts currentPage="quests" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Quests />} />
+            </Route>
+            <Route
+              path="/leaderboard"
+              element={
+                <ProtectedRoute requireUser>
+                  <UserLayouts currentPage="leaderboard" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Leaderboard />} />
+            </Route>
 
-          <Route
-            path="/admin/learning-path"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LearningPathManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/learning-path/:tierCode"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LevelDetailManagement />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/learning-path/:tierCode/levels/:levelId"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LevelDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/exercises/:exerciseId"
-            element={
-              <ProtectedRoute requireAdmin>
-                <ExerciseContentManager />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/exercises/:exerciseId/preview"
-            element={
-              <ProtectedRoute requireAdmin>
-                <ExercisePreviewPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/levels/:levelId/vocabulary-preview"
-            element={
-              <ProtectedRoute requireAdmin>
-                <VocabularyPreviewPage />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/friends"
+              element={
+                <ProtectedRoute requireUser>
+                  <UserLayouts currentPage="friends" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Friends />} />
+            </Route>
 
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute requireAdmin>
-                <UserManagement />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin/learning-path"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <LearningPathManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/learning-path/:tierCode"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <LevelDetailManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/learning-path/:tierCode/levels/:levelId"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <LevelDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/exercises/:exerciseId"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ExerciseContentManager />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/exercises/:exerciseId/preview"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <ExercisePreviewPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/levels/:levelId/vocabulary-preview"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <VocabularyPreviewPage />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/admin/gamification"
-            element={
-              <ProtectedRoute requireAdmin>
-                <GamificationManagement />
-              </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* <Route path="/admin/system" element={
+            <Route
+              path="/admin/gamification"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <GamificationManagement />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* <Route path="/admin/system" element={
             isAdminAuthenticated() ? <SystemSettings /> : <Navigate to="/admin/login" replace />
           } /> */}
 
-          {/* 404 Page */}
-          <Route
-            path="*"
-            element={
-              <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                  <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-                  <p className="text-xl text-gray-600 mb-8">
-                    Trang không tồn tại
-                  </p>
-                  <a
-                    href="/"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                  >
-                    aaaaa
-                  </a>
+            {/* 404 Page */}
+            <Route
+              path="*"
+              element={
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                  <div className="text-center">
+                    <h1 className="text-6xl font-bold text-gray-900 mb-4">
+                      404
+                    </h1>
+                    <p className="text-xl text-gray-600 mb-8">
+                      Trang không tồn tại
+                    </p>
+                    <a
+                      href="/"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      aaaaa
+                    </a>
+                  </div>
                 </div>
-              </div>
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
     </AuthProvider>
   );
 }
