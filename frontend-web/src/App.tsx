@@ -3,22 +3,39 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+
 // import ErrorBoundary from "./components/common/ErrorBoundary";
 
-// Admin Pages
+// Admin pages
 import Dashboard from "./components/admin/Dashboard";
-import LearningPathManagement from "./components/admin/LearningPathManagement";
-import LevelDetailManagement from "./components/admin/LevelDetailManagement";
-import LevelDetail from "./components/admin/LevelDetail";
-import UserManagement from "./components/admin/UserManagement";
-import GamificationManagement from "./components/admin/GamificationManagement";
-import ExerciseContentManager from "./components/admin/ExerciseContentManager";
-import VocabularyPreviewPage from "./components/admin/VocabularyPreviewPage";
-import ExercisePreviewPage from "./components/admin/ExercisePreviewPage";
+import AdminLayout from "./components/admin/AdminLayout";
+
+// Learning Path module
+import {
+  LearningPathManagement,
+  LevelDetailManagement,
+  LevelDetail,
+  VocabularyPreviewPage
+} from "./components/admin/learning-path";
+
+// Exercises module
+import {
+  ExerciseManagement,
+  ExerciseContentManager,
+  ExercisePreviewPage,
+  QuestionEditor
+} from "./components/admin/exercises";
+
+// Users module
+import  UserManagement  from "./components/admin/users/UserManagement";
+
+// Gamification module
+import GamificationManagement  from "./components/admin/gamification/GamificationManagement";
+
+// Auth
+import { AdminLogin, UserLogin, ProtectedRoute,AdminRegister } from "./components/auth";
 import UserLayouts from "./components/user/UserLayout";
 import UserHomepage from "./components/user/UserHomepage";
 import LearningLevels from "./components/user/LearningLevels";
@@ -34,9 +51,7 @@ import Friends from "./components/user/Friends";
 
 // import SystemSettings from './components/admin/SystemSettings';
 
-// Auth Pages (placeholder - bạn sẽ tạo sau)
-import AdminLogin from "./components/auth/AdminLogin";
-import UserLogin from "./components/auth/UserLogin";
+
 
 // User Pages (placeholder - bạn sẽ tạo sau)
 
@@ -53,6 +68,8 @@ function App() {
             {/* Admin Auth Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/user/login" element={<UserLogin />} />
+            <Route path="/admin/register" element={<AdminRegister />} />
+
 
             {/* Protected Admin Routes */}
             <Route

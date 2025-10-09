@@ -127,7 +127,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
                 </div>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700">{user?.name || 'Admin User'}</p>
+                <p className="text-sm font-medium text-gray-700">{user?.full_name || 'Admin User'}</p>
                 <p className="text-xs text-gray-500">{user?.email || 'admin@example.com'}</p>
               </div>
             </div>
@@ -176,4 +176,4 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage }) => {
   );
 };
 
-export default AdminLayout;
+export default AdminLayout;
