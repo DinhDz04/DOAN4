@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import Modal from '../common/Modal';
 import { X, Upload, Volume2 } from 'lucide-react';
 interface VocabularyFormProps {
@@ -11,13 +11,35 @@ interface VocabularyFormProps {
 
 const VocabularyForm: React.FC<VocabularyFormProps> = ({ isOpen, onClose, onSubmit, levelId, initialData }) => {
   const [formData, setFormData] = useState({
-    word: initialData?.word || '',
-    pronunciation: initialData?.pronunciation || '',
-    definition: initialData?.definition || '',
-    example: initialData?.example || '',
-    partOfSpeech: initialData?.partOfSpeech || '',
-    audioUrl: initialData?.audioUrl || ''
+    word: '',
+    pronunciation: '',
+    meaning: '',
+    exampleSentence: '', // Giữ nguyên field name này
+    partOfSpeech: '',
+    audioUrl: ''
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        word: initialData.word || '',
+        pronunciation: initialData.pronunciation || '',
+        meaning: initialData.meaning || '',
+        exampleSentence: initialData.exampleSentence || '', // Backend mới sẽ trả về exampleSentence
+        partOfSpeech: initialData.partOfSpeech || '',
+        audioUrl: initialData.audioUrl || ''
+      });
+    } else {
+      setFormData({
+        word: '',
+        pronunciation: '',
+        meaning: '',
+        exampleSentence: '',
+        partOfSpeech: '',
+        audioUrl: ''
+      });
+    }
+  }, [initialData, isOpen]);
 
   const partOfSpeechOptions = [
     'noun', 'verb', 'adjective', 'adverb', 'pronoun', 
@@ -75,8 +97,8 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({ isOpen, onClose, onSubm
           <input
             type="text"
             required
-            value={formData.definition}
-            onChange={(e) => setFormData({...formData, definition: e.target.value})}
+            value={formData.meaning}
+            onChange={(e) => setFormData({...formData, meaning: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="VD: Xin chào"
           />
@@ -88,8 +110,8 @@ const VocabularyForm: React.FC<VocabularyFormProps> = ({ isOpen, onClose, onSubm
           </label>
           <textarea
             required
-            value={formData.example}
-            onChange={(e) => setFormData({...formData, example: e.target.value})}
+            value={formData.exampleSentence}
+            onChange={(e) => setFormData({...formData, exampleSentence: e.target.value})}
             rows={2}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="VD: Hello, how are you?"

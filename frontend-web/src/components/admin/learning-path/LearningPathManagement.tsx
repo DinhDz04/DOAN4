@@ -41,8 +41,8 @@ const LearningPathManagement: React.FC = () => {
     setShowTierForm(true);
   };
 
-  const handleEditTier = (tier: Tier) => {
-    setEditingTier(tier);
+  const handleEditTier = (tiers: Tier) => {
+    setEditingTier(tiers);
     setShowTierForm(true);
   };
 

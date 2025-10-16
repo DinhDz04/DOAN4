@@ -14,8 +14,7 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Auth validations
-// middleware/validation.js
+
 const validateAdminRegister = [
   body('email')
     .isEmail()
@@ -58,11 +57,7 @@ const validateAdminLogin = [
 
 // Tier validations
 const validateTierCreate = [
-  body('name')
-    .notEmpty()
-    .withMessage('Tên bậc học là bắt buộc')
-    .isLength({ max: 100 })
-    .withMessage('Tên không được vượt quá 100 ký tự'),
+
   body('code')
     .isIn(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'])
     .withMessage('Mã bậc học phải là A1, A2, B1, B2, C1 hoặc C2'),

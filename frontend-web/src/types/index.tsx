@@ -108,8 +108,8 @@ export interface Vocabulary {
   levelId: string;
   word: string;
   pronunciation: string;
-  definition: string;
-  example: string;
+  meaning: string;
+  exampleSentence: string;
   audioUrl?: string;
   imageUrl?: string;
   partOfSpeech: string;

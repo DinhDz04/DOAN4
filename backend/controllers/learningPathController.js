@@ -1,9 +1,13 @@
 const Tier = require('../models/Tier');
 const Level = require('../models/Level');
 const Vocabulary = require('../models/Vocabulary');
-
+const Exercise = require('../models/Exercise');
+const ExerciseType = require('../models/ExerciseType');
+const ExerciseAttempt = require('../models/ExerciseAttempt');
+const UserLevelProgress = require('../models/UserLevelProgress');
+const UserStats = require('../models/UserStats');
 class LearningPathController {
-  // ===== TIER METHODS =====
+
 
   // Get all tiers
   async getTiers(req, res) {
@@ -79,7 +83,7 @@ class LearningPathController {
   // Create tier
   async createTier(req, res) {
     try {
-      const { name, code, description, order, isActive = true } = req.body;
+      const {  code, description, order, isActive = true } = req.body;
 
       // Check if order index exists
       const orderExists = await Tier.isOrderIndexExists(order);
@@ -101,7 +105,6 @@ class LearningPathController {
 
       const tierData = {
         name: code,
-        display_name: name,
         description,
         order_index: order,
         is_active: isActive
@@ -152,7 +155,6 @@ class LearningPathController {
 
       const updateData = {
         name: code,
-        display_name: name,
         description,
         order_index: order,
         is_active: isActive,
@@ -264,7 +266,7 @@ class LearningPathController {
         word: vocab.word,
         pronunciation: vocab.pronunciation,
         definition: vocab.meaning,
-        example: vocab.example_sentence,
+        exampleSentence: vocab.example_sentence,
         audioUrl: vocab.audio_url,
         partOfSpeech: vocab.part_of_speech,
         orderIndex: vocab.order_index,
@@ -640,13 +642,130 @@ class LearningPathController {
     }
   }
 
+ async getExerciseTypes(req, res) {
+    try {
+      const exerciseTypes = await ExerciseType.findAll();
+
+      res.json({
+        success: true,
+        data: exerciseTypes,
+        total: exerciseTypes.length
+      });
+
+    } catch (error) {
+      console.error('Get exercise types error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Lỗi khi lấy danh sách loại bài tập'
+      });
+    }
+  }
+
+  // ===== EXERCISE METHODS =====
+
+  // Get exercises by level
+  async getExercisesByLevel(req, res) {
+    try {
+      const { levelId } = req.params;
+
+      const exercises = await Exercise.findByLevelId(levelId);
+
+      const formattedExercises = exercises.map(exercise => ({
+        id: exercise.id,
+        levelId: exercise.level_id,
+        title: exercise.title,
+        description: exercise.description,
+        type: exercise.exercise_type?.name,
+        displayType: exercise.exercise_type?.display_name,
+        content: exercise.content,
+        difficulty: exercise.difficulty,
+        points: exercise.points,
+        timeLimit: exercise.time_limit,
+        orderIndex: exercise.order_index,
+        isActive: exercise.is_active,
+        createdAt: exercise.created_at,
+        updatedAt: exercise.updated_at
+      }));
+
+      res.json({
+        success: true,
+        data: formattedExercises,
+        total: formattedExercises.length
+      });
+
+    } catch (error) {
+      console.error('Get exercises error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Lỗi khi lấy danh sách bài tập'
+      });
+    }
+  }
+
   // Create exercise
   async createExercise(req, res) {
     try {
-      res.status(501).json({
-        success: false,
-        message: 'Exercise feature chưa được triển khai'
+      const { 
+        levelId, 
+        exerciseTypeId, 
+        title, 
+        description, 
+        content, 
+        difficulty = 1, 
+        points = 10, 
+        order, 
+        timeLimit,
+        isActive = true 
+      } = req.body;
+
+      // Check if level exists
+      const level = await Level.findById(levelId);
+      if (!level) {
+        return res.status(404).json({
+          success: false,
+          message: 'Level không tồn tại'
+        });
+      }
+
+      // Check if exercise type exists
+      const exerciseType = await ExerciseType.findById(exerciseTypeId);
+      if (!exerciseType) {
+        return res.status(404).json({
+          success: false,
+          message: 'Loại bài tập không tồn tại'
+        });
+      }
+
+      // Check if order index exists in level
+      const orderExists = await Exercise.isOrderIndexExists(levelId, order);
+      if (orderExists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Thứ tự đã tồn tại trong level này'
+        });
+      }
+
+      const exerciseData = {
+        level_id: levelId,
+        exercise_type_id: exerciseTypeId,
+        title,
+        description,
+        content,
+        difficulty,
+        points,
+        order_index: order,
+        time_limit: timeLimit,
+        is_active: isActive
+      };
+
+      const exercise = await Exercise.create(exerciseData);
+
+      res.status(201).json({
+        success: true,
+        message: 'Tạo bài tập thành công',
+        data: exercise
       });
+
     } catch (error) {
       console.error('Create exercise error:', error);
       res.status(500).json({
@@ -659,10 +778,60 @@ class LearningPathController {
   // Update exercise
   async updateExercise(req, res) {
     try {
-      res.status(501).json({
-        success: false,
-        message: 'Exercise feature chưa được triển khai'
+      const { id } = req.params;
+      const { 
+        exerciseTypeId, 
+        title, 
+        description, 
+        content, 
+        difficulty, 
+        points, 
+        order, 
+        timeLimit,
+        isActive 
+      } = req.body;
+
+      // Check if exercise exists
+      const existingExercise = await Exercise.findById(id);
+      if (!existingExercise) {
+        return res.status(404).json({
+          success: false,
+          message: 'Bài tập không tồn tại'
+        });
+      }
+
+      // Check if order index exists (excluding current exercise)
+      if (order !== existingExercise.order_index) {
+        const orderExists = await Exercise.isOrderIndexExists(existingExercise.level_id, order, id);
+        if (orderExists) {
+          return res.status(400).json({
+            success: false,
+            message: 'Thứ tự đã tồn tại trong level này'
+          });
+        }
+      }
+
+      const updateData = {
+        exercise_type_id: exerciseTypeId,
+        title,
+        description,
+        content,
+        difficulty,
+        points,
+        order_index: order,
+        time_limit: timeLimit,
+        is_active: isActive,
+        updated_at: new Date().toISOString()
+      };
+
+      const exercise = await Exercise.update(id, updateData);
+
+      res.json({
+        success: true,
+        message: 'Cập nhật bài tập thành công',
+        data: exercise
       });
+
     } catch (error) {
       console.error('Update exercise error:', error);
       res.status(500).json({
@@ -675,10 +844,24 @@ class LearningPathController {
   // Delete exercise
   async deleteExercise(req, res) {
     try {
-      res.status(501).json({
-        success: false,
-        message: 'Exercise feature chưa được triển khai'
+      const { id } = req.params;
+
+      // Check if exercise exists
+      const existingExercise = await Exercise.findById(id);
+      if (!existingExercise) {
+        return res.status(404).json({
+          success: false,
+          message: 'Bài tập không tồn tại'
+        });
+      }
+
+      await Exercise.delete(id);
+
+      res.json({
+        success: true,
+        message: 'Xóa bài tập thành công'
       });
+
     } catch (error) {
       console.error('Delete exercise error:', error);
       res.status(500).json({
@@ -689,4 +872,4 @@ class LearningPathController {
   }
 }
 
-module.exports = new LearningPathController();
+module.exports = new LearningPathController();

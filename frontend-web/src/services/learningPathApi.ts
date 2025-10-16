@@ -28,7 +28,10 @@ export const learningPathApi = {
     const response = await apiService.get(`/api/learning-path/tiers/${tierId}/levels`);
     return response.data;
   },
-
+  getTierByCode: async (tierCode: string): Promise<Tier> => {
+  const response = await apiService.get(`/api/learning-path/tiers/${tierCode}`);
+  return response.data;
+  },
   getLevelDetail: async (levelId: string): Promise<Level> => {
     const response = await apiService.get(`/api/learning-path/levels/${levelId}`);
     return response.data;
@@ -51,6 +54,7 @@ export const learningPathApi = {
   // Vocabulary APIs
   getVocabularyByLevel: async (levelId: string): Promise<Vocabulary[]> => {
     const response = await apiService.get(`/api/learning-path/levels/${levelId}/vocabulary`);
+    // DEBUG
     return response.data;
   },
 
@@ -73,7 +77,10 @@ export const learningPathApi = {
     const response = await apiService.get(`/api/learning-path/levels/${levelId}/exercises`);
     return response.data;
   },
-
+    getExerciseTypes: async (): Promise<Array<{ id: string; name: string; display_name: string }>> => {
+    const response = await apiService.get('/api/learning-path/exercise-types');
+    return response.data;
+  },
   createExercise: async (data: Partial<Exercise>): Promise<Exercise> => {
     const response = await apiService.post('/api/learning-path/exercises', data);
     return response.data;
@@ -87,4 +94,4 @@ export const learningPathApi = {
   deleteExercise: async (id: string): Promise<void> => {
     await apiService.delete(`/api/learning-path/exercises/${id}`);
   },
-};
+};

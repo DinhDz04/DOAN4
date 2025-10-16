@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import { X } from 'lucide-react';
+import { learningPathApi } from '../../services/learningPathApi';
 
 interface LevelFormProps {
   isOpen: boolean;
@@ -17,24 +18,59 @@ const LevelForm: React.FC<LevelFormProps> = ({
   tierCode, 
   initialData 
 }) => {
-  const [formData, setFormData] = useState({
-    name: initialData?.name || '',
-    description: initialData?.description || '',
-    order: initialData?.order || 1,
-    isLocked: initialData?.isLocked ?? false,
-    unlockConditions: initialData?.unlockConditions || []
+  // SỬA: Khai báo rõ type cho unlockConditions là string[]
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    order: number;
+    isLocked: boolean;
+    unlockConditions: string[];
+  }>({
+    name: '',
+    description: '',
+    order: 1,
+    isLocked: false,
+    unlockConditions: []
   });
 
-  // Mock data - bạn sẽ thay thế bằng API call thực tế
-  const [availableLevels, setAvailableLevels] = useState([
-    { id: '1', name: 'Level 1 - Nhập môn', order: 1 },
-    { id: '2', name: 'Level 2 - Cơ bản', order: 2 },
-    { id: '3', name: 'Level 3 - Trung cấp', order: 3 },
-    { id: '4', name: 'Level 4 - Nâng cao', order: 4 },
-  ]);
-
+  // SỬA: Khai báo type cho availableLevels
+  const [availableLevels, setAvailableLevels] = useState<Array<{
+    id: string;
+    name: string;
+    order: number;
+  }>>([]);
+  
   const [selectedLevelId, setSelectedLevelId] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchLevels = async () => {
+      if (isOpen && tierCode) {
+        try {
+          setLoading(true);
+          // Lấy tier details để lấy ID
+          const tierData = await learningPathApi.getTierByCode(tierCode);
+          // Lấy levels của tier này
+          const levelsData = await learningPathApi.getLevelsByTier(tierData.id);
+          
+          setAvailableLevels(levelsData.map((level: any) => ({
+            id: level.id,
+            name: level.name,
+            order: level.order
+          })));
+        } catch (error) {
+          console.error('Error fetching levels:', error);
+          setAvailableLevels([]);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchLevels();
+  }, [isOpen, tierCode]);
+
+  // CẬP NHẬT: useEffect để reset form data
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -42,7 +78,10 @@ const LevelForm: React.FC<LevelFormProps> = ({
         description: initialData.description || '',
         order: initialData.order || 1,
         isLocked: initialData.isLocked ?? false,
-        unlockConditions: initialData.unlockConditions || []
+        // SỬA: Đảm bảo unlockConditions là string[]
+        unlockConditions: Array.isArray(initialData.unlockConditions) 
+          ? initialData.unlockConditions 
+          : []
       });
     } else {
       setFormData({
@@ -58,7 +97,15 @@ const LevelForm: React.FC<LevelFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // CHUẨN HÓA DỮ LIỆU TRƯỚC KHI GỬI
+    const submitData = {
+      ...formData,
+      // Đảm bảo unlockConditions là mảng rỗng nếu không bị khóa
+      unlockConditions: formData.isLocked ? formData.unlockConditions : []
+    };
+    
+    onSubmit(submitData);
   };
 
   const addCondition = () => {
@@ -77,11 +124,11 @@ const LevelForm: React.FC<LevelFormProps> = ({
   const removeCondition = (levelId: string) => {
     setFormData({
       ...formData,
-      unlockConditions: formData.unlockConditions.filter((id: string) => id !== levelId)
+      unlockConditions: formData.unlockConditions.filter(id => id !== levelId)
     });
   };
 
-  // Lọc ra các level có thể chọn làm điều kiện (các level có order nhỏ hơn)
+  // CẬP NHẬT: Lọc các level có thể chọn làm điều kiện
   const getAvailableLevelsForCondition = () => {
     return availableLevels.filter(level => 
       level.order < formData.order && 
@@ -111,7 +158,6 @@ const LevelForm: React.FC<LevelFormProps> = ({
             value={formData.name}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="VD: Level 1 - Nhập môn"
           />
         </div>
 
@@ -167,6 +213,7 @@ const LevelForm: React.FC<LevelFormProps> = ({
                   value={selectedLevelId}
                   onChange={(e) => setSelectedLevelId(e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={loading || getAvailableLevelsForCondition().length === 0}
                 >
                   <option value="">-- Chọn level --</option>
                   {getAvailableLevelsForCondition().map(level => (
@@ -178,12 +225,22 @@ const LevelForm: React.FC<LevelFormProps> = ({
                 <button
                   type="button"
                   onClick={addCondition}
-                  disabled={!selectedLevelId}
+                  disabled={!selectedLevelId || loading}
                   className="px-3 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Thêm
                 </button>
               </div>
+              
+              {loading && (
+                <p className="text-sm text-gray-500">Đang tải danh sách levels...</p>
+              )}
+
+              {!loading && getAvailableLevelsForCondition().length === 0 && formData.order <= 1 && (
+                <p className="text-sm text-yellow-600">
+                  Không có level nào trước level này để chọn làm điều kiện
+                </p>
+              )}
               
               {formData.unlockConditions.length > 0 && (
                 <div className="border rounded-lg p-2">

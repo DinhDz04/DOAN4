@@ -36,5 +36,6 @@ router.get('/levels/:levelId/exercises', learningPathController.getExercisesByLe
 router.post('/exercises', authenticate, requireAdmin, learningPathController.createExercise);
 router.put('/exercises/:id', authenticate, requireAdmin, learningPathController.updateExercise);
 router.delete('/exercises/:id', authenticate, requireAdmin, validateId, learningPathController.deleteExercise);
+router.get('/exercise-types', learningPathController.getExerciseTypes);
 
-module.exports = router;
+module.exports = router;

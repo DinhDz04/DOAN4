@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // THÊM useEffect
 import Modal from '../common/Modal';
+
 interface TierFormProps {
   isOpen: boolean;
   onClose: () => void;
@@ -9,11 +10,30 @@ interface TierFormProps {
 
 const TierForm: React.FC<TierFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({
-    code: initialData?.code || '',
-    description: initialData?.description || '',
-    order: initialData?.order || 1,
-    isActive: initialData?.isActive ?? true
+    code: '',
+    description: '',
+    order: 1,
+    isActive: true
   });
+
+  // THÊM useEffect để cập nhật formData khi initialData thay đổi
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        code: initialData.code || '',
+        description: initialData.description || '',
+        order: initialData.order || 1,
+        isActive: initialData.isActive ?? true
+      });
+    } else {
+      setFormData({
+        code: '',
+        description: '',
+        order: 1,
+        isActive: true
+      });
+    }
+  }, [initialData, isOpen]); // THÊM isOpen để reset khi mở form mới
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +54,16 @@ const TierForm: React.FC<TierFormProps> = ({ isOpen, onClose, onSubmit, initialD
             value={formData.code}
             onChange={(e) => setFormData({...formData, code: e.target.value})}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!!initialData} // VÔ HIỆU HÓA KHI CHỈNH SỬA
           >
             <option value="">Chọn</option>
             {tierCodes.map(code => (
               <option key={code} value={code}>{code}</option>
             ))}
           </select>
+          {initialData && (
+            <p className="text-xs text-gray-500 mt-1">Không thể thay đổi mã bậc học khi chỉnh sửa</p>
+          )}
         </div>
 
         <div>
@@ -102,4 +126,5 @@ const TierForm: React.FC<TierFormProps> = ({ isOpen, onClose, onSubmit, initialD
     </Modal>
   );
 };
+
 export default TierForm;
